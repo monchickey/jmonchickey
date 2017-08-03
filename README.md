@@ -1,4 +1,7 @@
-# Java类库 monchickey 2.0.0 20170610
+# Java类库 monchickey 2.0.1 20170803
+
+# 2.0.1 20170803
+    - 完善DataCompute类 生成基于name和全局唯一uuid的方法
 
 # 2.0.0 20170610
     - 修改项目名以及类注释由coodog 为 monchickey 包结构由coodog为com.monchickey

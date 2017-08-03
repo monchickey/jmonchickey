@@ -2,6 +2,7 @@ package com.monchickey.dataprocess;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 /**
  * 数据计算类 包括求值，计数，函数计算等
@@ -90,6 +91,23 @@ public class DataCompute {
     public int centuryNumber(int y) {
         int c = y/100;
         return c + 1;
+    }
+    
+    /**
+     * 根据名字生成唯一uuid
+     * @param name
+     * @return 基于name的UUID字符串
+     */
+    public String getNameUUID(String name) {
+        return UUID.nameUUIDFromBytes(name.getBytes()).toString().replace("-", "");
+    }
+    
+    /**
+     * 生成全局唯一uuid
+     * @return random uuid
+     */
+    public String getRandomUUID() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
     
     public static void main(String[] args) {
