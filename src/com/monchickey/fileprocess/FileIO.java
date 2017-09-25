@@ -401,6 +401,36 @@ public class FileIO {
         return filelist;
     }
     
+    /**
+     * 获取文件的十六进制内容 二进制安全
+     * @param filename
+     * @return 正常返回16进制字符串 异常返回null
+     */
+    public String getFileHexContent(String filename) {
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(filename);
+            int byteNumber;
+            StringBuilder fileContent = new StringBuilder();
+            while((byteNumber = inputStream.read()) != -1) {
+                fileContent.append(Integer.toHexString(byteNumber));
+            }
+            return fileContent.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
     public static void main(String args[]) throws IOException {
         // FileIO fio = new FileIO();
 //      String url = "D:\\KuGou\\test1.txt";

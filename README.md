@@ -1,9 +1,12 @@
-# Java类库 monchickey 2.0.1 20170803
+# Java类库 monchickey 2.0.2 20170925
 
-# 2.0.1 20170803
+## 2.0.2 20170925
+    - 修正少量数据转换类方法、完善文件操作类方法
+
+## 2.0.1 20170803
     - 完善DataCompute类 生成基于name和全局唯一uuid的方法
 
-# 2.0.0 20170610
+## 2.0.0 20170610
     - 修改项目名以及类注释由coodog 为 monchickey 包结构由coodog为com.monchickey
 
 ## monchickey最常用的封装的包和类：

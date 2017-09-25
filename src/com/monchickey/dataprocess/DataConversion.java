@@ -20,41 +20,53 @@ import com.google.gson.Gson;
 
 public class DataConversion {
     
-    /*
+    /**
      * 整数转成二进制字符串
      * 简单封装 无其他意义
+     * @param n
+     * @return
      */
     public String integer2BinaryString(int n) {
         return Integer.toBinaryString(n);
     }
     
-    /*
+    /**
      * 整数转成16进制字符串
+     * @param n
+     * @return
      */
     public String integer2HexString(int n) {
         return Integer.toHexString(n);
     }
     
-    /*
+    /**
      * 整数转换成8进制字符串
+     * @param n
+     * @return
      */
     public String integer2OctalString(int n) {
         return Integer.toOctalString(n);
     }
     
-    /*
-     * 字符串转换为10进制数 支持普通字符串、2、8、16等其他进制的字符串
+    /**
+     * 进制字符串转换为10进制整数
+     * 支持普通字符串、2、8、16等其他进制的字符串
      * 字符串中若有非数字字符则抛出异常，需要提前处理
+     * @param s 具体的字符串实体
+     * @param oca_number 进制数
+     * @return 返回转换之后的整数
      */
-    public Integer string2Integer(String s) {
-        return Integer.parseInt(s);
+    public Integer string2Integer(String s, int oca_number) {
+        return Integer.parseInt(s, oca_number);
     }
     
     
-    /*
+    /**
      * 整数转换为字节数组
+     * @param i 传入的普通整型数字 长度为4个字节
+     * @return 字节数组
      */
-    public byte[] int2Bytes(int i){
+    public byte[] int2Bytes(int i) {
         byte[] arr = new byte[4];
         for(int j = 0;j < arr.length;j++){
             arr[j] = (byte) ((i >> j*8) & 0xff);
@@ -62,10 +74,12 @@ public class DataConversion {
         return arr;
     }
     
-    /*
+    /**
      * 字节数组转换为整数
+     * @param b
+     * @return 返回对应的整数
      */
-    public int bytes2Int(byte[] b){
+    public int bytes2Int(byte[] b) {
         int result = 0;
         for(int i = 0;i < b.length;i++){
             result += (int) ((b[i] & 0xff) << i*8);
@@ -73,25 +87,33 @@ public class DataConversion {
         return result;
     }
     
-    /*
-     * 字节数组转换字符串
+    /**
+     * 字节数组转换为字符串
+     * @param b
+     * @return
      */
-    public String bytes2String(byte[] b){
+    public String bytes2String(byte[] b) {
         String s = new String(b);
         return s;
     }
     
     
-    /*
+    /**
      * 字符串转换字节数组
+     * @param s
+     * @return
      */
-    public byte[] string2Bytes(String s){
+    public byte[] string2Bytes(String s) {
         byte[] b = s.getBytes();
         return b;
     }
     
-    /*
+    /**
      * 字符串的编码转换
+     * @param s
+     * @param old_code
+     * @param new_code
+     * @return 正常返回新编码的字符串 异常返回null
      */
     public String stringConv(String s, String old_code, String new_code) {
         try {
@@ -107,8 +129,6 @@ public class DataConversion {
         }
     }
     
-    
-
 
     /**
      * 将json字符串对象转换为Map
@@ -173,7 +193,7 @@ public class DataConversion {
     /**
      * 日期字符串转时间戳
      * @param timeStr
-     * @return
+     * @return 转换正常返回时间戳 转换失败返回0
      */
     public long stringToTime(String timeStr, String dateFormat) {
         //String dateFormat = "yyyy-MM-dd HH:mm:ss";
@@ -196,9 +216,10 @@ public class DataConversion {
     }
 
     
-    
     public static void main(String[] args) {
         DataConversion tc = new DataConversion();
+        int a = tc.string2Integer("1000", 2);
+        System.out.println(a);
         
 //      System.out.println(tc.integer2BinaryString(113));
 //      System.out.println(tc.integer2HexString(15));
