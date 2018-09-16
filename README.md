@@ -1,4 +1,8 @@
-# Java类库 monchickey 2.0.2 20170925
+# Java类库 monchickey 2.1.0 20180916
+
+## 2.1.0 20180916
+    - 项目由eclipse切换为IntelliJ IDEA
+    - 新增LRU cache工具类
 
 ## 2.0.2 20170925
     - 修正少量数据转换类方法、完善文件操作类方法

@@ -8,7 +8,7 @@ import com.monchickey.dataprocess.PBKDF2Hash;
  *
  */
 
-public class MonchickeyTest {
+public class PDKDF2HashTest {
     public static void main(String[] args)
     {
         try

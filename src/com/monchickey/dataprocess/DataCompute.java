@@ -13,11 +13,11 @@ import java.util.UUID;
 public class DataCompute {
     
     /**
-     * Sha1 单向加密算法
+     * Sha1 单向hash算法
      * @param inPassword
      * @return String 40位sha码
      */
-    public String shaEncrypt(String inPassword) {
+    public String sha1Encrypt(String inPassword) {
         MessageDigest sha = null;
         try {
             sha = MessageDigest.getInstance("SHA");
@@ -113,7 +113,7 @@ public class DataCompute {
     public static void main(String[] args) {
         DataCompute compute = new DataCompute();
         System.out.println(compute.dateToWeek(2017, 6, 10));
-        System.out.println(compute.shaEncrypt("sc"));
+        System.out.println(compute.sha1Encrypt("sc"));
     }
     
 }

@@ -113,7 +113,7 @@ public class DataValidation {
     
     public static void main(String[] args) {
         DataValidation dv = new DataValidation();
-        if(dv.isChinese("haha")) {
+        if(dv.isChinese("曾")) {
             System.out.println("匹配成功！");
         } else {
             System.out.println("匹配失败");
