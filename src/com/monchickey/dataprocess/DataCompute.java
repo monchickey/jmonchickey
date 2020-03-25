@@ -3,6 +3,7 @@ package com.monchickey.dataprocess;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+import java.util.zip.CRC32;
 
 /**
  * 数据计算类 包括求值，计数，函数计算等
@@ -109,11 +110,25 @@ public class DataCompute {
     public String getRandomUUID() {
         return UUID.randomUUID().toString().replace("-", "");
     }
+
+    /**
+     * crc32 冗余校验计算
+     * @param src
+     * @return
+     */
+    public long crc32(byte[] src) {
+        CRC32 crc = new CRC32();
+        crc.update(src);
+        return crc.getValue();
+    }
     
     public static void main(String[] args) {
         DataCompute compute = new DataCompute();
         System.out.println(compute.dateToWeek(2017, 6, 10));
         System.out.println(compute.sha1Encrypt("sc"));
+
+        System.out.println(compute.crc32("hello abc".getBytes()));
+        System.out.println(compute.crc32("aaaaaaa".getBytes()));
     }
     
 }

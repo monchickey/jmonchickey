@@ -1,6 +1,6 @@
 package com.monchickey.tests;
 
-import com.monchickey.cacheutil.LRUCache;
+import com.monchickey.cache.LRUCache;
 
 public class CacheUtilTest {
     public static void main(String[] args) {

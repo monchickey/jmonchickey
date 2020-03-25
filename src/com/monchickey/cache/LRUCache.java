@@ -1,4 +1,4 @@
-package com.monchickey.cacheutil;
+package com.monchickey.cache;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
