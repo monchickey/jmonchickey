@@ -12,7 +12,7 @@ import java.sql.SQLException;
  *
  */
 
-public class MysqlTools {
+public class MySQLUtil {
     
     /**
      * 获取数据库连接
@@ -28,7 +28,7 @@ public class MysqlTools {
         Connection conn = null;
         try {
             // 加载驱动
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(url, username, password);
             return conn;
         } catch (ClassNotFoundException e) {
