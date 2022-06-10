@@ -1,4 +1,4 @@
-package com.monchickey.networkcommunication;
+package com.monchickey.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;

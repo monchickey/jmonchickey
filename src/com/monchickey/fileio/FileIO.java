@@ -1,4 +1,4 @@
-package com.monchickey.fileprocess;
+package com.monchickey.fileio;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

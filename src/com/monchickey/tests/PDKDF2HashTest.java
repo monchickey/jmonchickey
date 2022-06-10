@@ -1,6 +1,6 @@
 package com.monchickey.tests;
 
-import com.monchickey.dataprocess.PBKDF2Hash;
+import com.monchickey.security.PBKDF2Hash;
 
 /**
  * monchickey 测试类

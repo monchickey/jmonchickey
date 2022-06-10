@@ -1,4 +1,4 @@
-package com.monchickey.imageprocess;
+package com.monchickey.image;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -17,7 +17,7 @@ import javax.imageio.stream.ImageInputStream;
  * @author monchickey
  *
  */
-public class ImageCut {
+public class Cropping {
     
     /**
      * 裁剪 jpg 类型的图片
@@ -86,6 +86,6 @@ public class ImageCut {
     
     
     public static void main(String[] args) {
-        ImageCut.cutImage("images/test.png", "images/test1.png", "png", 350, 99, 164, 245);
+        Cropping.cutImage("images/test.png", "images/test1.png", "png", 350, 99, 164, 245);
     }
 }

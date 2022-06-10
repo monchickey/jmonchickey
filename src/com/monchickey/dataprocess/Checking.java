@@ -12,16 +12,16 @@ import java.util.regex.Pattern;
  *
  */
 
-public class DataValidation {
+public class Checking {
     
     /**
      * 判断字符串中是否包含指定字符串
      * @param text
-     * @param query_str
+     * @param pattern
      * @return
      */
-    public boolean isContain(String text, String query_str) {
-        return text.contains(query_str);
+    public static boolean isContain(String text, String pattern) {
+        return text.contains(pattern);
     }
     
     /**
@@ -29,7 +29,7 @@ public class DataValidation {
      * @param email
      * @return
      */
-    public boolean isEmail(String email) {
+    public static boolean isEmail(String email) {
         String reg = "^[a-zA-Z_]{1,}[0-9]{0,}@(([a-zA-z0-9]-*){1,}\\.){1,3}[a-zA-z\\-]{1,}$";
         //编译正则表达式
         Pattern pattern = Pattern.compile(reg);
@@ -43,7 +43,7 @@ public class DataValidation {
      * @param number
      * @return
      */
-    public boolean isPosInteger(String number) {
+    public static boolean isPosInteger(String number) {
         Pattern p = Pattern.compile("^[1-9][0-9]{0,}$");
         
         Matcher m = p.matcher(number);
@@ -58,7 +58,7 @@ public class DataValidation {
      * @param dateStr 格式必须为2016-05-30这样的格式
      * @return
      */
-    public boolean isDate(String dateStr) {
+    public static boolean isDate(String dateStr) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         //设置严格匹配，默认是宽松匹配
         format.setLenient(false);
@@ -78,7 +78,7 @@ public class DataValidation {
      * @param username
      * @return
      */
-    public boolean isUsername(String username) {
+    public static boolean isUsername(String username) {
         Matcher m = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]{3,15}$").matcher(username);
         if(m.find()) {
             return true;
@@ -92,7 +92,7 @@ public class DataValidation {
      * @param password
      * @return
      */
-    public boolean isPassword(String password) {
+    public static boolean isPassword(String password) {
         Matcher m = Pattern.compile("^[a-zA-Z0-9_~`.,;\':\"-]{6,18}$").matcher(password);
         if(m.find()) {
             return true;
@@ -106,19 +106,9 @@ public class DataValidation {
      * @param chinese
      * @return
      */
-    public boolean isChinese(String chinese) {
+    public static boolean isChinese(String chinese) {
         Matcher m = Pattern.compile("^[\u0391-\uFFE5]+$").matcher(chinese);
         return m.matches();
-    }
-    
-    public static void main(String[] args) {
-        DataValidation dv = new DataValidation();
-        if(dv.isChinese("曾")) {
-            System.out.println("匹配成功！");
-        } else {
-            System.out.println("匹配失败");
-        }
-        System.out.println("测试".length());
     }
     
 }

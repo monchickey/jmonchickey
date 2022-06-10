@@ -25,25 +25,20 @@ public class MySQLUtil {
      */
     public static Connection getConnection(String hostName, int port,String databaseName,String username, String password) {
         String url = "jdbc:mysql://" + hostName + ":" + port + "/" + databaseName + "?useUnicode=true&characterEncoding=UTF-8";
-        Connection conn = null;
+        Connection conn;
         try {
             // 加载驱动
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(url, username, password);
             return conn;
         } catch (ClassNotFoundException e) {
-            System.out.println("没有找到jdbc驱动...");
             e.printStackTrace();
-            return null;
         } catch (SQLException e) {
-            System.out.println("sql参数异常...");
             e.printStackTrace();
-            return null;
         } catch (Exception e) {
-            System.out.println("执行getConnection内部获取连接异常...");
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
     
     /**
@@ -53,12 +48,11 @@ public class MySQLUtil {
      * @return
      */
     public static PreparedStatement getStatement(Connection conn, String sql) {
-        PreparedStatement pstmt = null;
+        PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(sql);
             return pstmt;
         } catch (SQLException e) {
-            System.out.println("编译stmt语句失败...");
             e.printStackTrace();
             return null;
         }
@@ -70,12 +64,11 @@ public class MySQLUtil {
      * @return
      */
     public static ResultSet getQueryResults(PreparedStatement pstmt) {
-        ResultSet rs = null;
+        ResultSet rs;
         try {
             rs = pstmt.executeQuery();
             return rs;
         } catch (SQLException e) {
-            System.out.println("执行sql异常...");
             e.printStackTrace();
             return null;
         }
@@ -93,22 +86,20 @@ public class MySQLUtil {
                 rs.close();
             }
         } catch(Exception ex) {
-            System.out.println("关闭rs资源异常...");
             ex.printStackTrace();
         }
     }
     
     /**
      * 销毁语句对象
-     * @param pstm
+     * @param stmt
      */
-    public static void close(PreparedStatement pstm) {
+    public static void close(PreparedStatement stmt) {
        try {
-           if(pstm!=null && !pstm.isClosed()) {
-               pstm.close();
+           if(stmt != null && !stmt.isClosed()) {
+               stmt.close();
            }
        } catch (SQLException e) {
-           System.out.println("关闭pstmt资源异常...");
            e.printStackTrace();
        }    
     }
@@ -123,7 +114,6 @@ public class MySQLUtil {
                 conn.close();
             }
         } catch (SQLException e) {
-            System.out.println("关闭数据库连接异常...");
             e.printStackTrace();
         }
     }

@@ -1,4 +1,4 @@
-package com.monchickey.networkcommunication;
+package com.monchickey.net;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;

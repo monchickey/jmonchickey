@@ -1,4 +1,4 @@
-package com.monchickey.fileprocess;
+package com.monchickey.fileio;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,17 +11,17 @@ import java.util.Properties;
  *
  */
 
-public class ConfigTools {
+public class ConfigUtil {
     
     /**
      * 读取指定配置文件的指定配置项的值
      * @param configFileName 配置文件在文件系统的路径 类型:.properties
      * @param key 配置项名称
-     * @param charset 取决于properties文件的编码 是utf8的就写UTF-8
+     * @param charset 取决于properties文件的编码 例如: UTF-8
      * @return
      *      返回配置项对应的值 如果出现异常返回null
      */
-    public static String getConfig(String configFileName, String key, String charset) {
+    public static String getPropertyByKey(String configFileName, String key, String charset) {
         Properties pro = new Properties();
         String configValue = null;
         try {
@@ -37,5 +37,25 @@ public class ConfigTools {
             e.printStackTrace();
         }
         return configValue;
+    }
+
+    /**
+     * 读取指定配置文件的全部配置项
+     * @param configFileName 配置文件在文件系统的路径 类型:.properties
+     * @return
+     *      返回配置项Properties类型的properties变量，如果出现异常返回结果是空的properties
+     */
+    public static Properties getProperties(String configFileName) {
+        Properties properties = new Properties();
+        try {
+            FileInputStream in = new FileInputStream(configFileName);
+            properties.load(in);
+            in.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties;
     }
 }

@@ -11,7 +11,7 @@ import java.util.zip.CRC32;
  *
  */
 
-public class DataCompute {
+public class Processing {
     
     /**
      * Sha1 单向hash算法
@@ -123,7 +123,7 @@ public class DataCompute {
     }
     
     public static void main(String[] args) {
-        DataCompute compute = new DataCompute();
+        Processing compute = new Processing();
         System.out.println(compute.dateToWeek(2017, 6, 10));
         System.out.println(compute.sha1Encrypt("sc"));
 
