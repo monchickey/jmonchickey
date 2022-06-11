@@ -1,12 +1,6 @@
 package com.monchickey.fileio;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipEntry;
@@ -21,16 +15,16 @@ import java.util.zip.ZipOutputStream;
 public class FileCompress {
     
     /**
-     * 对指定的单层目录进行压缩 传入参数:待压缩的目录、压缩文件输出目录、压缩文件注释(只能为英文)
-     * @param dirUri
-     * @param zipFileUri
-     * @param zipDesc
+     * 对指定的单层目录进行压缩
+     * @param dir 待压缩的目录
+     * @param zipFileUri 压缩后的输出文件
+     * @param zipDesc 压缩文件注释(只能为英文)
      * @return 压缩成功返回true，压缩失败返回false
      */
-    public boolean filesZipOne(String dirUri, String zipFileUri, String zipDesc) {
-        File fileDir = new File(dirUri);
+    public static boolean singleDirZip(String dir, String zipFileUri, String zipDesc) {
+        File fileDir = new File(dir);
         File zipFile = new File(zipFileUri);
-        InputStream input = null;
+        InputStream input;
         ZipOutputStream zipOut;
         try {
             zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
@@ -39,24 +33,19 @@ public class FileCompress {
                 //是目录就进行压缩
                 File[] files = fileDir.listFiles();
                 if(files != null && files.length > 0) {
-                    for(int i = 0;i < files.length;i++) {
-                        input = new FileInputStream(files[i]);
-                        zipOut.putNextEntry(new ZipEntry(fileDir.getName() + File.separator + files[i].getName()));
-                        int temp = 0;
-                        while((temp = input.read()) != -1) {
+                    for (File file : files) {
+                        input = new FileInputStream(file);
+                        zipOut.putNextEntry(new ZipEntry(fileDir.getName() + File.separator + file.getName()));
+                        int temp;
+                        while ((temp = input.read()) != -1) {
                             zipOut.write(temp);
                         }
                         input.close();
                     }
-                } else {
-                    
                 }
             }
             zipOut.close();
             return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -64,42 +53,34 @@ public class FileCompress {
     }
     
     /**
-     * 压缩 - private
-     * @param srcFile
-     * @return
+     * 压缩文件或目录
+     * @param srcFile 源文件或源目录
+     * @return 压缩成功: true
+     *         压缩失败: false
      */
-    private boolean filesZip(File srcFile) {
+    private static boolean zipCompress(File srcFile) {
         String basePath = srcFile.getPath();
         String destPath = basePath + ".zip";
-        if(filesZip(srcFile, destPath)) {
-            return true;
-        }
-        return false;
+        return zipCompress(srcFile, destPath);
     }
     
     /**
      * 重载方法 - 压缩 传入原路径和目标路径
-     * @param srcFile
-     * @param destFile
-     * @return
+     * @param srcFile  源文件或目录
+     * @param destFile 目标文件或目录
+     * @return 压缩成功: true
+     *         压缩失败: false
      */
-    private boolean filesZip(File srcFile, File destFile) {
-        
-        //输出做CRC32校验
+    private static boolean zipCompress(File srcFile, File destFile) {
         try {
+            //输出做CRC32校验
             CheckedOutputStream cos = new CheckedOutputStream(new FileOutputStream(destFile), new CRC32());
             ZipOutputStream zos = new ZipOutputStream(cos);
             //传入第三个参数：压缩文件相对路径
-            boolean status = false;
-            if(filesZip(srcFile, zos, "")) {
-                status = true;
-            }
+            boolean status = zipCompress(srcFile, zos, "");
             zos.flush();
             zos.close();
             return status;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -108,80 +89,66 @@ public class FileCompress {
     
     /**
      * 重载-压缩 传入源文件、压缩路径
-     * @param srcFile
-     * @param destPath
-     * @return
+     * @param srcFile  源文件或源目录
+     * @param destPath  压缩文件路径
+     * @return 压缩成功: true
+     *        压缩失败: false
      */
-    private boolean filesZip(File srcFile, String destPath) {
-        if(filesZip(srcFile, new File(destPath))) {
-            return true;
-        } else {
-            return false;
-        }
+    private static boolean zipCompress(File srcFile, String destPath) {
+        return zipCompress(srcFile, new File(destPath));
     }
     
     /**
      * 
-     * @param srcFile
-     * @param zos
-     * @param basePath
-     * @return
+     * @param srcFile 源文件或源目录
+     * @param zos  zip输出流
+     * @param basePath  输出路径
+     * @return 压缩成功: true
+     *        压缩失败: false
      */
-    private boolean filesZip(File srcFile, ZipOutputStream zos, String basePath) {
+    private static boolean zipCompress(File srcFile, ZipOutputStream zos, String basePath) {
         if(srcFile.isDirectory()) {
             //压缩目录
-            if(compressDir(srcFile, zos, basePath)) {
-                return true;
-            } else {
-                return false;
-            }
+            return zipCompressDir(srcFile, zos, basePath);
         } else {
             //压缩文件
-            if(compressFile(srcFile, zos, basePath)) {
-                return true;
-            } else {
-                return false;
-            }
+            return zipCompressFile(srcFile, zos, basePath);
         }
     }
     
     /**
-     * 主调函数入口 传入文件的路径，只有该方法对外提供开放调用，压缩文件和目录同目录压缩文件名默认为目录名
-     * @param srcPath
-     * @return
+     * 压缩文件或目录函数入口，该方法对外提供开放调用
+     * 默认压缩后的文件和源文件或源目录在同一层级，文件名为源文件或源目录后拼上.zip
+     * @param srcPath 传入文件或目录的路径
+     * @return 压缩成功: true
+     *         压缩失败: false
      */
-    public boolean filesZip(String srcPath) {
+    public static boolean zipCompress(String srcPath) {
         File srcFile = new File(srcPath);
-        if(filesZip(srcFile)) {
-            return true;
-        } else {
-            return false;
-        }
+        return zipCompress(srcFile);
     }
     
     /**
      * 重载方法 - 自定义 - 压缩文件传入输入路径和输出路径
-     * @param srcPath
-     * @param destPath
-     * @return
+     * @param srcPath 源文件或源目录
+     * @param destPath 压缩文件路径
+     * @return 压缩成功: true
+     *        压缩失败: false
      */
-    public boolean filesZip(String srcPath, String destPath) {
+    public static boolean zipCompress(String srcPath, String destPath) {
         File srcFile = new File(srcPath);
-        if(filesZip(srcFile, destPath)) {
-            return true;
-        } else {
-            return false;
-        }
+        return zipCompress(srcFile, destPath);
     }
     
     /**
      * 目录压缩
-     * @param dir
-     * @param zos
-     * @param basePath
-     * @return
+     * @param dir  源目录
+     * @param zos  zip输出流
+     * @param basePath  压缩文件输出路径
+     * @return 压缩成功: true
+     *        压缩失败: false
      */
-    private boolean compressDir(File dir, ZipOutputStream zos, String basePath) {
+    private static boolean zipCompressDir(File dir, ZipOutputStream zos, String basePath) {
         File[] files = dir.listFiles();
         //构建空目录
         try {
@@ -192,7 +159,7 @@ public class FileCompress {
             }
             for(File file:files) {
                 //递归压缩
-                filesZip(file, zos, basePath + dir.getName() + "/");
+                zipCompress(file, zos, basePath + dir.getName() + "/");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -204,12 +171,13 @@ public class FileCompress {
     
     /**
      * 单个文件压缩
-     * @param file
-     * @param zos
-     * @param dir
-     * @return
+     * @param file  源文件
+     * @param zos  zip输出流
+     * @param dir 压缩文件输出路径
+     * @return 压缩成功: true
+     *         压缩失败: false
      */
-    private boolean compressFile(File file, ZipOutputStream zos, String dir) {
+    private static boolean zipCompressFile(File file, ZipOutputStream zos, String dir) {
         ZipEntry entry = new ZipEntry(dir + file.getName());
         try {
             zos.putNextEntry(entry);
@@ -227,13 +195,6 @@ public class FileCompress {
             return false;
         }
         
-    }
-    
-    public static void main(String[] args) {
-        FileCompress fc = new FileCompress();
-        if(fc.filesZip("C:\\Users\\Administrator\\Desktop\\ttt", "C:\\Users\\Administrator\\Desktop\\ttt.zip")) {
-            System.out.println("ok..");
-        }
     }
     
 }

@@ -24,14 +24,16 @@ import java.util.List;
  *
  */
 
-public class FileIO {
+public class IOUtil {
     
     /**
      * 判断一个完整的路径是文件还是目录
-     * @param uri
-     * @return String
+     * @param uri 输入的路径
+     * @return 如果是文件则返回字符串: file
+     *         如果是目录则返回字符串: dir
+     *         如果路径不存在则返回: null
      */
-    public String isFileorDirectory(String uri) {
+    public static String isFileOrDirectory(String uri) {
         final String FILE_MSG = "file";
         final String DIR_MSG = "dir";
         File f = new File(uri);
@@ -48,9 +50,9 @@ public class FileIO {
     
     /**
      * 创建目录 如果多层则递归创建
-     * @param path
+     * @param path 要创建的目录完整路径
      */
-    public void createDirectorys(String path) {
+    public static void createDirectorys(String path) {
         File fpath = new File(path);
         if(fpath.getParentFile().exists()) {
             fpath.mkdir();
