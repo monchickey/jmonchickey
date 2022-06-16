@@ -52,26 +52,26 @@ public class IOUtil {
      * 创建目录 如果多层则递归创建
      * @param path 要创建的目录完整路径
      */
-    public static void createDirectorys(String path) {
-        File fpath = new File(path);
-        if(fpath.getParentFile().exists()) {
-            fpath.mkdir();
+    public static void createDirs(String path) {
+        File f = new File(path);
+        if(f.getParentFile().exists()) {
+            f.mkdir();
         } else {
-            createDirectorys(fpath.getParent());
-            fpath.mkdir();
+            createDirs(f.getParent());
+            f.mkdir();
         }
     }
     
     /**
-     * 向文件写入内容 ，从前面开始写不影响后面的内容
+     * 向文件写入内容 ，从头部开始写不影响后面的内容
      * 如果文件不存在，会尝试重新建立
-     * @param uri
-     * @param text
+     * @param uri  文件路径
+     * @param text 写入的内容字符串
      * @return
      */
-    public int fileFront(String uri, String text) {
+    public int insertHead(String uri, String text) {
         final int PASS = 0; //成功
-        final int ERROR_NOTFOUND = 1;   //文件不存在或错误
+        final int ERROR_NOT_FOUND = 1;   //文件不存在或错误
         final int ERROR_IO = 2; //文件写入出错
         File f = new File(uri);
         try {
@@ -85,7 +85,7 @@ public class IOUtil {
             return PASS;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return ERROR_NOTFOUND;
+            return ERROR_NOT_FOUND;
         } catch (IOException e) {
             e.printStackTrace();
             return ERROR_IO;
@@ -94,13 +94,13 @@ public class IOUtil {
     
     /**
      * 文件内容追加 在文件最后添加内容，不影响前面的所有内容
-     * @param uri
-     * @param text
-     * @return
+     * @param uri  文件路径
+     * @param text 追加的内容字符串
+     * @return  写入成功返回0，文件不存在返回1, IO异常返回2
      */
     public int fileAppend(String uri, String text) {
         final int PASS = 0; //成功
-        final int ERROR_NOTFOUND = 1;   //文件不存在或错误
+        final int ERROR_NOT_FOUND = 1;   //文件不存在或错误
         final int ERROR_IO = 2; //文件写入出错
         File f = new File(uri);
         try {
@@ -116,7 +116,7 @@ public class IOUtil {
             return PASS;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return ERROR_NOTFOUND;
+            return ERROR_NOT_FOUND;
         } catch (IOException e) {
             e.printStackTrace();
             return ERROR_IO;
@@ -126,9 +126,9 @@ public class IOUtil {
     /**
      * 向文件写入内容 会覆盖文件全部内容 如果文件不存在会尝试创建
      * 返回true写入成功 返回false则写入失败
-     * @param uri
-     * @param text
-     * @return
+     * @param uri  文件路径
+     * @param text 要写入的内容
+     * @return  成功: true  失败: false
      */
     public boolean fileWrite(String uri, String text) {
         try {
@@ -137,20 +137,17 @@ public class IOUtil {
             output.close();
             return true;
         } catch (FileNotFoundException e) {
-            System.out.println("打开文件失败...");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("写文件失败...");
             e.printStackTrace();
         }
         return false;
     }
     
     /**
-     * 文件内容读取
-     * 将内容返回一个字符串
-     * @param uri
-     * @return
+     * 文本文件内容读取，将内容返回一个字符串，不支持二进制文件
+     * @param uri  文件路径
+     * @return  文本文件内容
      */
     public String fileRead(String uri) {
         File f = new File(uri);
@@ -174,18 +171,17 @@ public class IOUtil {
     
     
     /**
-     * 带缓冲的文件复制
-     * 按字节复制
-     * @param old_uri
-     * @param new_uri
+     * 带缓冲的文件复制，按字节复制  支持全部类型的文件拷贝
+     * @param src  原文件
+     * @param dst  目标文件
      * @return
      */
-    public boolean bufferCopyFile(String old_uri, String new_uri) {
+    public boolean bufferCopyFile(String src, String dst) {
         try {
             //定义input的Buffer用于将文件内容读入到程序
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(old_uri)));
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(src));
             //定义output的Buffer用于将文件内容输出到另一个文件
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(new_uri)));
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dst));
             //循环读取 循环写入
             int c;
             while((c = bis.read()) != -1) {
@@ -282,10 +278,10 @@ public class IOUtil {
      * 基于字符的文件复制
      * 仅适用于复制非二进制文件即只能复制文本文件
      */
-    public boolean charFileCopy(String old_uri, String new_uri) {
+    public boolean charFileCopy(String src, String dst) {
         try {
-            FileReader fr = new FileReader(old_uri);
-            FileWriter fw = new FileWriter(new_uri);
+            FileReader fr = new FileReader(src);
+            FileWriter fw = new FileWriter(dst);
             char[] buffer = new char[2*1024];
             int c;
             while((c = fr.read(buffer, 0, buffer.length)) != -1) {
@@ -362,16 +358,16 @@ public class IOUtil {
         if(!dir.isDirectory()) {
             return null;
         }
-        List<String> filelist = new ArrayList<String>();
+        List<String> ls = new ArrayList<>();
         //获取所有文件对象
         File[] files = dir.listFiles();
         if(files != null && files.length > 0) {
             //遍历文件对象
             for(File f:files) {
-                filelist.add(f.getPath());
+                ls.add(f.getPath());
             }
         }
-        return filelist;
+        return ls;
     }
     
     
@@ -385,22 +381,22 @@ public class IOUtil {
         if(!dir.isDirectory()) {
             return null;
         }
-        List<String> filelist = new ArrayList<String>();
+        List<String> ls = new ArrayList<>();
         //获取所有文件对象
         File[] files = dir.listFiles();
         if(files != null && files.length > 0) {
             //遍历文件对象
             for(File f:files) {
-                List<String> sonFilelist = new ArrayList<String>();
-                filelist.add(f.getPath());
+                List<String> subFiles = new ArrayList<>();
+                ls.add(f.getPath());
                 //是目录再次循环
                 if(f.isDirectory()) {
-                    sonFilelist = fileListAll(uri + File.separator + f.getName());
+                    subFiles = fileListAll(uri + File.separator + f.getName());
                 }
-                filelist.addAll(sonFilelist);
+                ls.addAll(subFiles);
             }
         }
-        return filelist;
+        return ls;
     }
     
     /**
@@ -431,55 +427,5 @@ public class IOUtil {
                 e.printStackTrace();
             }
         }
-    }
-    
-    public static void main(String args[]) throws IOException {
-        // FileIO fio = new FileIO();
-//      String url = "D:\\KuGou\\test1.txt";
-//      if(fio.isFileorDirectory(url) == null) {
-//          System.out.println("资源不存在");
-//      } else if((fio.isFileorDirectory(url)).equals("file")) {
-//          System.out.println("是文件");
-//      } else {
-//          System.out.println("是文件夹");
-//      }
-        
-//      String state = fio.fileRead("D:\\KuGou\\test33.txt");
-//      if(state == null) {
-//          System.out.println("读取失败");
-//      } else {
-//          System.out.println(state);
-//      }
-        
-//      System.out.println("正在复制，请稍后...");
-//      String cmd = "cmd /c cls";
-//      if(fio.bufferCopyFile("D:\\KuGou\\xihuanni.flac", "D:\\KuGou\\xihuanni1.flac")) {
-//          Runtime.getRuntime().exec(cmd);
-//          System.out.println("复制成功！");
-//      } else {
-//          Runtime.getRuntime().exec(cmd);
-//          System.out.println("复制失败");
-//      }
-        
-//      if(fio.charLineFileCopy("D:\\KuGou\\test.txt", "D:\\KuGou\\testsksksk.txt")) {
-//          System.out.println("复制成功");
-//      } else {
-//          System.out.println("复制失败");
-//      }
-        
-//      long start = System.currentTimeMillis();
-//      ArrayList<String> filelist = (ArrayList<String>) fio.fileListAll("D:\\osimage\\");
-//      if(filelist != null && filelist.size() > 0) {
-//          for(String s:filelist) {
-//              System.out.println(s);
-//          }
-//          
-//          System.out.println("共" + filelist.size() +"个文件！");
-//      } else {
-//          System.out.println("没有文件");
-//      }
-//      long end = System.currentTimeMillis();
-//      System.out.println((end-start)/1000);
-        
     }
 }

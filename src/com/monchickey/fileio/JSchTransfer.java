@@ -16,22 +16,27 @@ import com.jcraft.jsch.SftpException;
  */
 public class JSchTransfer {
     
-    private static JSch jsch;
-    private static Session session;
-    private static String host;
-    private static int port;
-    private static String username;
-    private static String password;
+    private JSch jsch;
+    private Session session;
+    private String host;
+    private int port;
+    private String username;
+    private String password;
+
+    private boolean isConnected = false;
     
     public JSchTransfer(String host, int port,String username, String password) {
-        JSchTransfer.host = host;
-        JSchTransfer.port = port;
-        JSchTransfer.username = username;
-        JSchTransfer.password = password;
+        this.host = host;
+        this.port = port;
+        this.username = username;
+        this.password = password;
+
+        this.jsch = new JSch();
     }
     
     public void uploadFile(String localFile, String serverFolder) {
-        connect();
+        if(!isConnected)
+            connect();
         // 打开sftp管道
         try {
             Channel channel = session.openChannel("sftp");
@@ -44,13 +49,12 @@ public class JSchTransfer {
             e.printStackTrace();
         } catch (SftpException e) {
             e.printStackTrace();
-        } finally {
-            session.disconnect();
         }
     }
     
     public void getFile(String serverFile, String localFolder) {
-        connect();
+        if(!isConnected)
+            connect();
         //打开sftp管道
         try {
             Channel channel = session.openChannel("sftp");
@@ -61,28 +65,34 @@ public class JSchTransfer {
             e.printStackTrace();
         } catch (SftpException e) {
             e.printStackTrace();
-        } finally {
-            session.disconnect();
         }
     }
     
-    public static void connect() {
-        jsch = new JSch();
-        try {
-            session = jsch.getSession(username, host, port);
-            session.setPassword(password);
-            Properties config = new Properties();
-            config.put("StrictHostKeyChecking", "no");
-            session.setConfig(config);
-            session.connect();
-        } catch (JSchException e) {
-            e.printStackTrace();
+    public void connect() {
+        if(isConnected) return;
+        synchronized (session) {
+            if(isConnected) return;
+            try {
+                this.session = jsch.getSession(username, host, port);
+                this.session.setPassword(password);
+                Properties config = new Properties();
+                config.put("StrictHostKeyChecking", "no");
+                this.session.setConfig(config);
+                this.session.connect();
+            } catch (JSchException e) {
+                e.printStackTrace();
+            }
+            isConnected = true;
         }
-        
     }
-    
-    public static void main(String[] args) {
-        //uploadFile("/root/test/dhcp.png", "/root/test/");
-        //getFile("/root/test/dhcp.png", "/root/test/");
+
+    public void close() {
+        if(isConnected) {
+            synchronized (session) {
+                if(isConnected) {
+                    this.session.disconnect();
+                }
+            }
+        }
     }
 }
