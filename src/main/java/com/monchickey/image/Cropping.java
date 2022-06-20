@@ -22,13 +22,13 @@ public class Cropping {
     /**
      * 裁剪 jpg 类型的图片
      * @param inputFile 图片文件路径
+     * @param outputFile 裁剪后图片输出文件
      * @param x 开始裁减位置x轴坐标
      * @param y 开始裁减位置y轴坐标
      * @param width 裁剪的宽度
      * @param height 裁剪的高度
-     * @param outputFile 裁剪后图片输出文件
      */
-    public static void cutJPG(String inputFile, int x, int y, int width, int height, String outputFile) {
+    public static void cropJPG(String inputFile, String outputFile, int x, int y, int width, int height) {
         Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("jpg");
         ImageReader reader = readers.next();
         try {
@@ -52,15 +52,15 @@ public class Cropping {
     
     /**
      * 图片截取方法，将截取后的图片放到文件系统
-     * @param inputFile
-     * @param outputFile
-     * @param type
-     * @param x
-     * @param y
-     * @param width
-     * @param height
+     * @param inputFile 图片文件路径
+     * @param outputFile 裁剪后图片输出文件
+     * @param type  图片类型
+     * @param x 开始裁减位置x轴坐标
+     * @param y 开始裁减位置y轴坐标
+     * @param width 裁剪的宽度
+     * @param height 裁剪的高度
      */
-    public static void cutImage(String inputFile, String outputFile, String type, int x, int y, int width, int height) {
+    public static void cropImage(String inputFile, String outputFile, String type, int x, int y, int width, int height) {
         
         Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(type);
         ImageReader reader = readers.next();
@@ -82,10 +82,5 @@ public class Cropping {
             e.printStackTrace();
         }
         
-    }
-    
-    
-    public static void main(String[] args) {
-        Cropping.cutImage("images/test.png", "images/test1.png", "png", 350, 99, 164, 245);
     }
 }

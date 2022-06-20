@@ -17,42 +17,36 @@ import java.util.Map;
  *
  */
 
-public class WebGrab {
+public class HTTPUtil {
     
     /**
-     * 获取指定uri网络资源的源代码内容
-     * @param uri
-     * @param code
-     * @return
+     * 简单HTTP get方法获取指定uri网络资源
+     * @param uri  资源uri
+     * @param charset  字符串编码
+     * @return  请求成功: 返回资源内容, 请求失败: null
      */
-    public String getUrl(String uri, String code) {
+    public static String simpleGet(String uri, String charset) {
         try {
             URL url = new URL(uri);
             //获取字节输入流
             InputStream is = url.openStream();
             //转换为字符流
-            InputStreamReader isr = new InputStreamReader(is, code);
+            InputStreamReader isr = new InputStreamReader(is, charset);
             //添加缓冲
             BufferedReader br = new BufferedReader(isr);
-            
-            String data = "";
-            int byteData;
-            
-            while((byteData = br.read()) != -1) {
-                // Java中文字符为utf-16 一个中文字符底层占2个字节; 但是转换为字符串之后length()方法认为长度为1
-                if(byteData == 13 && br.read() == 10) {
-                    // 13为回车 文件每一行 换行符Java会认为是回车+换行 分别是13和10 所以长度是2 这里转为1
-                    data += "\n";
-                } else {
-                    data += String.valueOf((char) byteData);
-                }
+
+            StringBuffer buffer = new StringBuffer();
+            int b;
+
+            while((b = br.read()) != -1) {
+                buffer.append((char) b);
             }
             
             br.close();
             isr.close();
             is.close();
             
-            return data;
+            return buffer.toString();
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
@@ -65,53 +59,48 @@ public class WebGrab {
     
     
     /**
-     * 向指定URL发送GET方法的请求
+     * 向指定URI发起HTTP GET方法的请求
      * 
-     * @param url
+     * @param uri
      *            发送请求的URL
-     * @param param
-     *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式
-     * @param code
+     * @param params
+     *            请求参数字符串，例如: name1=value1&name2=value2
+     * @param headers
+     *             设置请求的HTTP header头
+     * @param charset
      *            请求响应的编码
-     * @param isPrinWrite 
-     *            是否开启后台打印响应头输出
-     * @return URL 所代表远程资源的响应结果 返回结果如果最后一行是空行则不会返回
+     * @return 成功: 资源响应头和内容, 失败: null
      */
-    public String httpGet(String url, String param, String code, boolean isPrinWrite) {
-        String result = "";
+    public static HTTPResponse get(String uri, String params, Map<String, String> headers, String charset) {
+        StringBuffer buffer = new StringBuffer();
         BufferedReader in = null;
         try {
-            String urlNameString = url + "?" + param;
+            String urlNameString = uri + "?" + params;
             URL realUrl = new URL(urlNameString);
             // 打开和URL之间的连接
             URLConnection connection = realUrl.openConnection();
-            // 设置通用的请求属性
-            connection.setRequestProperty("accept", "*/*");
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64)");
-            // 建立实际的连接
-            connection.connect();
-            if(isPrinWrite) {
-                // 获取所有响应头字段
-                Map<String, List<String>> map = connection.getHeaderFields();
-                // 后台遍历所有的响应头字段
-                for (String key : map.keySet()) {
-                    System.out.println(key + "--->" + map.get(key));
+            if(headers != null && headers.size() > 0) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    connection.setRequestProperty(entry.getKey(), entry.getValue());
                 }
             }
-            // 定义 BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), code));
-            String line = in.readLine();
-            if(line != null) {
-                result += line;
-            }
+            connection.connect();
+
+            // 获取所有响应头字段
+            Map<String, List<String>> responseHeaders = connection.getHeaderFields();
+
+            // 读取正文响应
+            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset));
+            String line;
             while ((line = in.readLine()) != null) {
-                result += ("\n" + line);
+                buffer.append(line);
+                buffer.append("\r\n");
             }
+
+            HTTPResponse response = new HTTPResponse(responseHeaders, buffer.toString());
+            return response;
         } catch (Exception e) {
-            System.out.println("发送GET请求出现异常！" + e);
             e.printStackTrace();
-            return null;
         } finally {
             try {
                 if (in != null) {
@@ -121,7 +110,7 @@ public class WebGrab {
                 e2.printStackTrace();
             }
         }
-        return result;
+        return null;
     }
     
     
@@ -160,39 +149,30 @@ public class WebGrab {
             // 定义BufferedReader输入流来读取URL的响应
             in = new BufferedReader(new InputStreamReader(conn.getInputStream(), code));
             String line = in.readLine();
-            if(line != null) {
+            if (line != null) {
                 result += line;
             }
             while ((line = in.readLine()) != null) {
                 result += ("\n" + line);
             }
         } catch (Exception e) {
-            System.out.println("发送 POST 请求出现异常！"+e);
+            System.out.println("发送 POST 请求出现异常！" + e);
             e.printStackTrace();
             return null;
-        } finally{
-            try{
-                if(out!=null){
+        } finally {
+            try {
+                if (out != null) {
                     out.close();
                 }
-                if(in!=null){
+                if (in != null) {
                     in.close();
                 }
-            }
-            catch(IOException ex){
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
         return result;
     }
     
-    
-    
-    public static void main(String[] args) {
-        WebGrab g = new WebGrab();
-        String data = g.getUrl("http://127.0.0.1/test/image.jpg", "utf-8");
-        System.out.println(data);
-        System.out.println(data.length());
-    }
-    
 }
+
