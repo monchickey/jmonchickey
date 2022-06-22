@@ -33,11 +33,6 @@
             <artifactId>json</artifactId>
             <version>20220320</version>
         </dependency>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>4.2.3</version>
-        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -64,6 +59,13 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
         </plugins>

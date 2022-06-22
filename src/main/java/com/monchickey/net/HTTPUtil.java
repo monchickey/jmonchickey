@@ -1,10 +1,7 @@
 package com.monchickey.net;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -69,7 +66,7 @@ public class HTTPUtil {
      *             设置请求的HTTP header头
      * @param charset
      *            请求响应的编码
-     * @return 成功: 资源响应头和内容, 失败: null
+     * @return 成功: 资源响应头和内容的HTTPResponse对象, 失败: null
      */
     public static HTTPResponse get(String uri, String params, Map<String, String> headers, String charset) {
         StringBuffer buffer = new StringBuffer();
@@ -119,44 +116,48 @@ public class HTTPUtil {
      * 
      * @param url
      *            发送请求的 URL
-     * @param param
-     *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式
-     * @param code
+     * @param body
+     *            请求正文
+     * @param headers
+     *            设置请求的HTTP header头
+     * @param charset
      *            返回资源响应的读取编码方式
-     * @return 所代表远程资源的响应结果
+     * @return 成功: 资源响应头和内容的HTTPResponse对象, 失败: null
      */
-    public String httpPost(String url, String param, String code) {
+    public static HTTPResponse post(String url, String body, Map<String, String> headers, String charset) {
         PrintWriter out = null;
         BufferedReader in = null;
-        String result = "";
+        StringBuffer buffer = new StringBuffer();
         try {
             URL realUrl = new URL(url);
             // 打开和URL之间的连接
             URLConnection conn = realUrl.openConnection();
-            // 设置通用的请求属性
-            conn.setRequestProperty("accept", "*/*");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64)");
+            if(headers != null && headers.size() > 0) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    conn.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
             // 发送POST请求必须设置如下两行
             conn.setDoOutput(true);
             conn.setDoInput(true);
             // 获取URLConnection对象对应的输出流
             out = new PrintWriter(conn.getOutputStream());
             // 发送请求参数
-            out.print(param);
+            out.print(body);
             // flush输出流的缓冲
             out.flush();
             // 定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), code));
-            String line = in.readLine();
-            if (line != null) {
-                result += line;
-            }
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), charset));
+
+            String line;
             while ((line = in.readLine()) != null) {
-                result += ("\n" + line);
+                buffer.append(line);
+                buffer.append("\r\n");
             }
+
+            HTTPResponse response = new HTTPResponse(conn.getHeaderFields(), buffer.toString());
+            return response;
         } catch (Exception e) {
-            System.out.println("发送 POST 请求出现异常！" + e);
             e.printStackTrace();
             return null;
         } finally {
@@ -171,8 +172,107 @@ public class HTTPUtil {
                 ex.printStackTrace();
             }
         }
-        return result;
     }
-    
+
+    /**
+     * 通过HTTP/HTTPS方式下载图片
+     * @param imageUrl 图片URL
+     * @param savePath 保存图片文件的目录
+     * @param saveFilename 保存的文件名
+     * @param timeout 图片下载超时时间 单位: s
+     * @return
+     *     0 下载成功, -1 文件异常,-2 打开服务器连接失败,-3 io流读取异常,-4 图片保存错误
+     */
+    public static int downloadImage(String imageUrl, String savePath, String saveFilename, int timeout) {
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(savePath + File.separator + saveFilename);
+            byte[] imageStream = getImageUrl(imageUrl, timeout);
+            if(imageStream.length == 1) {
+                return -2;
+            }
+            if(imageStream.length == 2 || imageStream.length == 3) {
+                return -3;
+            }
+
+            os.write(imageStream, 0, imageStream.length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return -1;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -4;
+        } finally {
+            try {
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * 获取远程图片的字节流, 通常都是以GET方式请求
+     * @param urlString 图片URL
+     * @param timeout  连接和读取的超时时间, 默认设置为一样的值, 单位: s
+     * @return  成功: 图片字节数组 失败: 数组长度为1,2,3 (正常图片大小一定不会小于10字节)
+     *          长度为1: URL打开失败, 长度为2: IO异常, 长度为3: 其他异常
+     */
+    public static byte[] getImageUrl(String urlString, int timeout) {
+        // 构造URL
+        URL url;
+        InputStream is = null;
+        ByteArrayOutputStream outputStream = null;
+        try {
+            url = new URL(urlString);
+            // 打开连接
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            //设置连接超时
+            con.setConnectTimeout(timeout*1000);
+            con.setRequestMethod("GET");
+            // 设置读取超时时间
+            con.setReadTimeout(timeout*1000);
+            is = con.getInputStream();
+            outputStream = new ByteArrayOutputStream();
+            readInputStream(is, outputStream);
+            byte[] data = outputStream.toByteArray();
+            return data;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return new byte[1];
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new byte[2];
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new byte[3];
+        } finally {
+            try {
+                if(is != null) {
+                    is.close();
+                }
+                if(outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 远程输入字节流读取  缓冲区大小: 4k
+     * @param inputStream 图片输入流
+     * @return 从输入流中读取到字节数组
+     * @throws IOException
+     */
+    private static void readInputStream(InputStream inputStream, ByteArrayOutputStream outputStream) throws IOException {
+        byte[] buffer = new byte[4096];
+        int len;
+        while((len = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, len);
+        }
+    }
 }
 

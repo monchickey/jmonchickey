@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class OSUtil {
+public class ExecUtil {
     /**
      * 执行操作系统命令
      * @param command 要执行的命令
