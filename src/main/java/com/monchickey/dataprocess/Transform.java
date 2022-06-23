@@ -120,7 +120,6 @@ public class Transform {
             //按照新编码打包为字符串
             return new String(bytes, dest);
         } catch (UnsupportedEncodingException e) {
-            //异常返回空
             return null;
         }
     }
@@ -173,41 +172,93 @@ public class Transform {
     public static String objectToJson(Object obj) {
         return new Gson().toJson(obj);
     }
-    
-    
+
+
+
     /**
-     * 时间戳转日期字符串
-     * @param time 单位为毫秒
-     * @return
+     * 转换半精度float16为单精度浮点数
+     * @param h  半精度浮点数, 由short类型表示
+     * @return 单精度浮点数数值
      */
-    public static String timeToString(long time, String dateFormat) {
-        // String dateFormat = "yyyy-MM-dd HH:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
-        return sdf.format(new Date(time));
-    }
-    
-    /**
-     * 日期字符串转时间戳
-     * @param timeStr
-     * @return 转换正常返回时间戳, 单位: ms 转换失败返回: 0
-     */
-    public static long stringToTime(String timeStr, String dateFormat) {
-        //String dateFormat = "yyyy-MM-dd HH:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
-        try {
-            return sdf.parse(timeStr).getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return 0;
+    public static float fromHalf(short h) {
+        int v = h;
+        switch(v) {
+            case 0x0000 :
+                return 0.0f;
+            case 0x8000 :
+                return -0.0f;
+            case 0x7c00 :
+                return Float.POSITIVE_INFINITY;
+            case 0xfc00 :
+                return Float.NEGATIVE_INFINITY;
+            // NaN not support
+            default :
+                return Float.intBitsToFloat(((h & 0x8000 ) << 16 ) | (((h & 0x7c00) + 0x1C000) << 13 ) | (( h & 0x03FF ) << 13));
         }
     }
-    
+
+
+    public static short half(float v) {
+        if(Float.isNaN(v))
+            throw new UnsupportedOperationException("NaN to half conversion not supported!");
+        if(v == Float.POSITIVE_INFINITY)
+            return (short) 0x7c00;
+        if(v == Float.NEGATIVE_INFINITY)
+            return (short) 0xfc00;
+        if(v == 0.0f)
+            return (short) 0x0000;
+        if(v == -0.0f)
+            return (short) 0x8000;
+        if(v > 65504.0f)
+            return 0x7bff;  // max value supported by half float
+        if(v < -65504.0f)
+            return (short) (0x7bff | 0x8000);
+        if(v > 0.0f && v < 5.96046E-8f)
+            return 0x0001;
+        if(v < 0.0f && v > -5.96046E-8f)
+            return (short) 0x8001;
+
+        final int f = Float.floatToIntBits(v);
+
+        return (short) (((f >> 16) & 0x8000) | ((((f & 0x7f800000) - 0x38000000) >> 13) & 0x7c00) | ((f >> 13) & 0x03ff));
+    }
+
+
     /**
-     * 获取当前时间戳 单位: ms
-     * @return
+     * 转换ipv4地址为对应的32位无符号数
+     * 因为UInt32用java有符号int无法表示, 所以返回类型为long
+     * @param ipv4
+     * @return  正常返回对应的整数, ip错误返回-1.
      */
-    public static long now() {
-        return System.currentTimeMillis();
+    public static long IPv4StringToNumber(String ipv4) {
+        String[] nums = ipv4.split("\\.");
+        if(nums.length != 4)
+            return -1L;
+        long number = 0L;
+        for(int i = 0; i < nums.length; i++) {
+            if(nums[i].isEmpty() || nums[i].length() > 3)
+                return -1L;
+            if(!Checking.isDigit(nums[i]))
+                return -1L;
+            int num = Integer.valueOf(nums[i]);
+            if(num < 0 || num > 255)
+                return -1L;
+            number += (num << (24 - i*8)) & 0xffffffffL;
+        }
+        return number;
+    }
+
+    /**
+     * 转换MAC字符串为对应的数字
+     * @param mac  示例: 48-5F-99-B9-70-9D => 79575438160029
+     * @return  转换成功返回原始数字, 类型: long, 转换失败返回: -1
+     */
+    public static long MACStringToNumber(String mac) {
+        String macHex = mac
+                .replace(":", "")
+                .replace("-", "");
+
+        return macHex.length() == 12 && Checking.isHex(macHex) ? Long.valueOf(macHex, 16) : -1L;
     }
     
 }

@@ -25,11 +25,8 @@ public class HTTPUtil {
     public static String simpleGet(String uri, String charset) {
         try {
             URL url = new URL(uri);
-            //获取字节输入流
             InputStream is = url.openStream();
-            //转换为字符流
             InputStreamReader isr = new InputStreamReader(is, charset);
-            //添加缓冲
             BufferedReader br = new BufferedReader(isr);
 
             StringBuffer buffer = new StringBuffer();

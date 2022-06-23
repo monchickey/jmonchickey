@@ -110,5 +110,38 @@ public class Checking {
         Matcher m = Pattern.compile("^[\u0391-\uFFE5]+$").matcher(chinese);
         return m.matches();
     }
+
+    /**
+     * 判断一个字符串是否全是数字组成
+     * @param v
+     * @return
+     */
+    public static boolean isDigit(String v) {
+        if(v.isEmpty())
+            return false;
+        for(int i = 0; i < v.length(); i++)
+            if(!Character.isDigit(v.charAt(i)))
+                return false;
+        return true;
+    }
+
+    /**
+     * 判断字符串是否是16进制字符串, 即0-9,a-f,A-F
+     * @param v
+     * @return
+     */
+    public static boolean isHex(String v) {
+        for(int i = 0; i < v.length(); i++) {
+            char h = v.charAt(i);
+            if(h >= '0' && h <= '9')
+                continue;
+            if(h >= 'A' && h <= 'F')
+                continue;
+            if(h >= 'a' && h <= 'f')
+                continue;
+            return false;
+        }
+        return true;
+    }
     
 }
